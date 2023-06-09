@@ -173,4 +173,4 @@ console.log( "NIE validation (tipo acceso 1) for 'Y8237411K': ", chas( "validate
 console.log( "DNI generado: ", chas( "generateDNI" ) );
 
 let ch = new chas;
-console.log( "NIE validation (tipo acceso 2) for 'y8237411k': ", ch.cat.validation.validateNIE( ["y8237411k"] ) );
+console.log( "NIE validation (tipo acceso 2) for 'y8237411l': ", ch.cat.validation.validateNIE( ["y8237411k"] ) );
