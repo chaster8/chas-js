@@ -11,6 +11,94 @@ let chas = function( nombreFuncion = "none", args = [] ) {
 
     // Aquí irán las diferentes categorías de funciones (propiedades de objeto), que a su vez pueden estar divididas en más categorías (propiedades de objeto)
     this.cat = {
+
+        dates : {
+
+            formatDate : ( args = [] ) => {
+
+                this.checkArgs( args, "Please provide 3 input arguments: the date itself (e.g. 2023/6/8), the input mask (e.g. aaaa/mm/dd) and the output mask (e.g. mm-dd-aaaa)." );
+
+                // Segunda capa de comprobación del array de argumentos de entrada
+                if ( args.length != 3 && args.length != 4 ) {
+                    throw new Error("Please provide 3 input arguments: the date itself (e.g. 2023/6/8), the input mask (e.g. aaaa/mm/dd) and the output mask (e.g. mm-dd-aaaa). 4th argument is optional and determines if padding is applied to months and days.");
+                }
+
+                let rawDate = args[0];
+                let inputMask = args[1];
+                let outputMask = args[2];
+                let addPadding = false;
+
+                if ( args.length == 4 )
+                    addPadding = args[3];
+
+
+                // Encuentra los separadores en las máscaras
+                let inputSeparator = inputMask.match(/[^amd]/)[0];
+                let outputSeparator = outputMask.match(/[^amd]/)[0];
+                let outputMaskParts = outputMask.split(outputSeparator);
+
+                // Descomponemos la fecha de entrada y la máscara de entrada en partes
+                let rawDateParts = rawDate.split(inputSeparator);
+                let inputMaskParts = inputMask.split(inputSeparator);
+
+                // Creamos un objeto que mapea las partes de la fecha de entrada a su valor
+                let dateMap = {};
+                for (let i = 0; i < inputMaskParts.length; i++) {
+                    dateMap[inputMaskParts[i]] = rawDateParts[i];
+                }
+
+                // Creamos la fecha de salida reemplazando las partes de la máscara de salida con los valores correspondientes
+                let outputDateParts = outputMaskParts.map(function(part) {
+                    if ( addPadding )
+                        return dateMap[part] < 10 ? "0" + dateMap[part] : dateMap[part];
+                    else
+                        return dateMap[part];
+                });
+
+                // Unimos las partes de la fecha de salida con el separador de salida
+                let outputDate = outputDateParts.join(outputSeparator);
+
+                return outputDate;
+
+            },
+
+            dateToTimestamp : ( args = [] ) => {
+
+                // Devuelve el timestamp en milisegundos de una fecha
+                
+                this.checkArgs( args, "Please provide 2 input arguments: the date itself (e.g. 2023/06/08) and the input mask (e.g. aaaa/mm/dd)." );
+
+                // Segunda capa de comprobación del array de argumentos de entrada
+                if ( args.length != 2 ) {
+                    throw new Error("Please provide 2 input arguments: the date itself (e.g. 2023/06/08) and the input mask (e.g. aaaa/mm/dd).");
+                }
+
+                let rawDate = args[0];
+                let inputMask = args[1];
+                
+                // Encuentra el separador en la máscara de entrada
+                let inputSeparator = inputMask.match(/[^a]/)[0];
+            
+                // Descomponemos la fecha de entrada y la máscara de entrada en partes
+                let rawDateParts = rawDate.split(inputSeparator);
+                let inputMaskParts = inputMask.split(inputSeparator);
+            
+                // Creamos un objeto que mapea las partes de la fecha de entrada a su valor
+                let dateMap = {};
+                for (let i = 0; i < inputMaskParts.length; i++) {
+                    dateMap[inputMaskParts[i]] = rawDateParts[i];
+                }
+            
+                // Creamos un objeto Date usando los valores mapeados
+                let date = new Date(dateMap['aaaa'], dateMap['mm'] - 1, dateMap['dd']);
+            
+                // Obtenemos el timestamp en milisegundos
+                let timestamp = date.getTime();
+            
+                return timestamp;
+            },
+
+        },
         
         validation : {
 
@@ -96,9 +184,39 @@ let chas = function( nombreFuncion = "none", args = [] ) {
 
             },
 
+            checkString : ( args = [] ) => {
+
+                this.checkArgs( args, "Please provide a string. Optionally, you can add the minimum and maximum number of chars." );
+
+                // Segunda capa de comprobación del array de argumentos de entrada
+                if ( args.length > 3 ) {
+                    throw new Error("Please provide a maximum of 3 input arguments: the string, the min. nº of chars (optional) and the max. nº of chars (optional).");
+                }
+
+                let str = args[0];
+                let minChars = undefined || args[1];
+                let maxChars = undefined || args[2];
+                let validString = true;
+
+                if ( typeof str != 'string' ) {
+                    validString = false;
+                }
+                
+                if ( minChars )
+                    if ( str.length < minChars )
+                        validString = false;
+                
+                if ( maxChars )
+                    if ( str.length > maxChars )
+                        validString = false;
+
+                return validString;
+
+            }
 
             
         },
+
         generation : {
             generateDNI : () => {
 
@@ -115,6 +233,52 @@ let chas = function( nombreFuncion = "none", args = [] ) {
                 return numDNI;
             }
         },
+
+        convert : {
+
+            celsiusToFahrenheit : ( args = [] ) => {
+
+                this.checkArgs( args, "Please provide an input value." );
+
+                let celsius = args[0];
+
+                return celsius * 9/5 + 32;
+
+            },
+
+            fahrenheitToCelsius : ( args = [] ) => {
+
+                this.checkArgs( args, "Please provide an input value." );
+
+                let fahrenheit = args[0];
+
+                return (fahrenheit - 32) * 5/9;
+
+            },
+
+            degreesToRadians : ( args = [] ) => {
+
+                this.checkArgs( args, "Please provide an input value." );
+
+                let degrees = args[0];
+
+                return degrees * (Math.PI / 180);
+
+            },
+
+            radiansToDegrees : ( args = [] ) => {
+
+                this.checkArgs( args, "Please provide an input value." );
+
+                let radians = args[0];
+
+                return radians * (180 / Math.PI);
+
+            },
+
+
+        },
+
         none : () => {
 
             return "Say something!";
@@ -168,9 +332,10 @@ let chas = function( nombreFuncion = "none", args = [] ) {
 */
 console.log( "Result: ", chas() );
 
-console.log( "NIE validation (tipo acceso 1) for 'Y8237411K': ", chas( "validateNIE", ["Y8237411K"] ) );
+// Modo a)
+let celsius = chas( "degreesToRadians", [180]);
+console.log( "myCheck: ", celsius );
 
-console.log( "DNI generado: ", chas( "generateDNI" ) );
-
+// Modo b)
 let ch = new chas;
-console.log( "NIE validation (tipo acceso 2) for 'y8237411l': ", ch.cat.validation.validateNIE( ["y8237411l"] ) );
+// console.log( "NIE validation (tipo acceso 2) for 'y8237411l': ", ch.cat.validation.validateNIE( ["y8237411l"] ) );
